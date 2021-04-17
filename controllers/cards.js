@@ -7,6 +7,11 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true }
   )
+    .orFail(() => {
+      const error = new Error("CastError");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((card) => res.send(card))
     .catch((err) => {
       console.log(err);
@@ -29,6 +34,11 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true }
   )
+    .orFail(() => {
+      const error = new Error("CastError");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((card) => res.send(card))
     .catch((err) => {
       console.log(err.name);
@@ -61,6 +71,11 @@ module.exports.createCard = (req, res) => {
 //Удаление
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params._id)
+    .orFail(() => {
+      const error = new Error("CastError");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === "CastError") {

@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const helmet = require('helmet');
 
 const { PORT = 3000 } = process.env;
 
@@ -21,6 +22,9 @@ module.exports.createCard = (req) => {
 
 app.use("/cards", cardsRouter);
 app.use("/users", usersRouter);
+app.use(helmet());
+
+app.disable('x-powered-by');
 
 mongoose.connect("mongodb://localhost:27017/mestodb", {
   useNewUrlParser: true,

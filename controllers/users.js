@@ -4,6 +4,11 @@ const User = require("../models/user");
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { runValidators: true })
+    .orFail(() => {
+      const error = new Error("CastError");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.statusCode === 404) {
@@ -19,6 +24,11 @@ module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true })
     .then((user) => res.send(user))
+    .orFail(() => {
+      const error = new Error("CastError");
+      error.statusCode = 404;
+      throw error;
+    })
     .catch((err) => {
       if (err.statusCode === 404) {
         res.status(404).send({ message: "Нет пользователя" });
@@ -45,6 +55,11 @@ module.exports.createUser = (req, res) => {
 //Получение
 module.exports.getUser = (req, res) => {
   User.findById(req.params._id)
+    .orFail(() => {
+      const error = new Error("CastError");
+      error.statusCode = 404;
+      throw error;
+    })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === "CastError") {
