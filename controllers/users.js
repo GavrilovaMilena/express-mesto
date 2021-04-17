@@ -47,11 +47,13 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params._id)
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.statusCode === 404) {
+      if (err.name === "CastError") {
+        res.status(400).send({ message: "Данные некорректны" });
+      } else if (err.statusCode === 404) {
         res.status(404).send({ message: "Нет пользователя" });
-        return;
+      } else {
+        res.status(500).send({ message: "Запрашиваемый ресурс не найден" });
       }
-      res.status(500).send({ message: "Запрашиваемый ресурс не найден" });
     });
 };
 
