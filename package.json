@@ -13,19 +13,20 @@
     "type": "git",
     "url": "git+https://github.com/GavrilovaMilena/express-mesto.git"
   },
-  "author": "",
+  "author": "Milena Gavrilova",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/GavrilovaMilena/express-mesto/issues"
   },
   "homepage": "https://github.com/GavrilovaMilena/express-mesto#readme",
   "devDependencies": {
-    "eslint": "^7.24.0"
+    "eslint": "^7.24.0",
+    "nodemon": "^2.0.7"
   },
   "dependencies": {
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.1",
-    "mongoose": "^5.12.3"
+    "mongoose": "^5.12.4"
   }
 }
