@@ -3,7 +3,7 @@ const User = require("../models/user");
 //Обновление
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.statusCode === 404) {
@@ -17,7 +17,7 @@ module.exports.updateUser = (req, res) => {
 //Обновление
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.statusCode === 404) {
@@ -58,7 +58,7 @@ module.exports.getUser = (req, res) => {
 };
 
 //Получение
-module.exports.getUsers = (req, req) => {
+module.exports.getUsers = (req, res) => {
   User.getMaxListeners({})
     .then((users) => res.send(users))
     .catch(() =>
