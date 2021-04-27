@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
+const { createUser, login } = require('./controllers/users');
+
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
@@ -25,6 +27,9 @@ app.use('/users', usersRouter);
 app.use(helmet());
 
 app.disable('x-powered-by');
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
