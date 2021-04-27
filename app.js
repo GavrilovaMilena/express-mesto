@@ -16,13 +16,6 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '607aaa3a22cfed2f1c96acef',
-  };
-  next();
-});
-
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
 app.use(helmet());
