@@ -4,19 +4,20 @@ const validator = require('validator');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
+    default: 'Рик Санчез',
   },
   about: {
     type: String,
-    required: true,
     minlength: 2,
     maxlength: 30,
+    default: 'Гениальный учёный',
   },
   avatar: {
     type: String,
-    required: true,
+    default:
+      'http://pm1.narvii.com/6878/7590f2750286a5952f65d5a0ebebc8f328b8163br1-720-901v2_00.jpg',
   },
   email: {
     type: String,

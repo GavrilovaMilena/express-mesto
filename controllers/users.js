@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/user');
 
 module.exports.updateUser = (req, res) => {
@@ -45,16 +46,26 @@ module.exports.updateAvatar = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((newUser) => res.send(newUser))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Ошибка. Данные некорректны' });
-        return;
-      }
-      res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
-    });
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10).then((hash) => {
+    User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    })
+      .then((newUser) => res.send(newUser))
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          res.status(400).send({ message: 'Ошибка. Данные некорректны' });
+          return;
+        }
+        res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
+      });
+  });
 };
 
 module.exports.getUser = (req, res) => {
