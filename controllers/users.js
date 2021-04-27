@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 module.exports.updateUser = (req, res) => {
@@ -91,4 +92,16 @@ module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
     .catch(() => res.status(500).send({ message: 'Запрашиваемый ресурс не найден' }));
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'my-secret', {
+        expiresIn: '7d',
+      });
+      res.send({ token });
+    })
+    .catch(() => res.status(401).send({ message: 'Необходима авторизация' }));
 };
