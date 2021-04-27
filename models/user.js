@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
 function findUserByCredentials(email, password) {
   // попытаемся найти пользовател по почте
   return this.findOne({ email }) // this — это модель User
-    .select( '+password' )
+    .select('+password')
     .then((user) => {
       // не нашёлся — отклоняем промис
       if (!user) {

@@ -1,6 +1,9 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const BadRequestError = require('../errors/BadRequestError');
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params._id,
     { $addToSet: { likes: req.user._id } },
@@ -11,21 +14,23 @@ module.exports.likeCard = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then((card) => res.send(card))
+    .then((card) => {
+      if (!card) {
+        next(new NotFoundError('Карточка не найдена.'));
+      } else {
+        res.send(card);
+      }
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Данные некорректны' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({
-          message: 'Карточки не существует, невозможно проставить лайк',
-        });
+        next(new BadRequestError('Данные некорректны'));
       } else {
-        res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
+        next(err);
       }
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params._id,
     { $pull: { likes: req.user._id } },
@@ -36,33 +41,36 @@ module.exports.dislikeCard = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.statusCode === 404) {
-        res
-          .status(404)
-          .send({ message: 'Карточки не существует, невозможно убрать лайк' });
-        return;
+    .then((card) => {
+      if (!card) {
+        next(new NotFoundError('Карточка не найдена.'));
+      } else {
+        res.send(card);
       }
-      res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Данные некорректны'));
+      } else {
+        next(err);
+      }
     });
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((newCard) => res.send(newCard))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Ошибка. Данные некорректны' });
-        return;
+        next(new BadRequestError('Ошибка. Данные некорректны'));
+      } else {
+        next(err);
       }
-      res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  const owner = req.user._id;
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params._id)
     .orFail(() => {
       const error = new Error('CastError');
@@ -70,21 +78,27 @@ module.exports.deleteCard = (req, res) => {
       throw error;
     })
     .then((card) => {
-      if (!card.owner.equals(owner)) {
-        res.status(404).send({ message: 'Нет прав на удаление этой карточки' });
+      if (!card) {
+        next(new NotFoundError('Карточка не найдена'));
+      } else if (!card.owner.equals(req.user._id)) {
+        next(new ForbiddenError('Невозможно удалить чужую карточку'));
       } else {
-        Card.deleteOne(card).then(() => res.status(200).send({ message: 'Карточка удалена' }));
+        Card.deleteOne(req.params._id)
+          .then((result) => res.send(result))
+          .catch(next);
       }
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        res.status(400).send({ message: 'Данные некорректны' });
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Данные некорректны'));
+      } else {
+        next(err);
       }
     });
 };
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Запрашиваемый ресурс не найден' }));
+    .then((card) => res.send(card))
+    .catch(next);
 };

@@ -1,8 +1,11 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -14,39 +17,55 @@ module.exports.updateUser = (req, res) => {
       error.statusCode = 404;
       throw error;
     })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.statusCode === 404) {
-        res.status(404).send({ message: 'Нет пользователя' });
-        return;
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Пользователь не найден'));
+      } else {
+        res.send(user);
       }
-      res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Нет пользователя'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Ошибка. Данные некорректны'));
+      } else {
+        next(err);
+      }
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { avatar },
     { new: true, runValidators: true },
   )
-    .then((user) => res.send(user))
     .orFail(() => {
       const error = new Error('CastError');
       error.statusCode = 404;
       throw error;
     })
-    .catch((err) => {
-      if (err.statusCode === 404) {
-        res.status(404).send({ message: 'Нет пользователя' });
-        return;
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Нет пользователя'));
+      } else {
+        res.send(user);
       }
-      res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Нет пользователя'));
+      } else if (err.name === 'ValidationError') {
+        next(new BadRequestError('Ошибка. Данные некорректны'));
+      } else {
+        next(err);
+      }
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -61,37 +80,37 @@ module.exports.createUser = (req, res) => {
       .then((newUser) => res.send(newUser))
       .catch((err) => {
         if (err.name === 'ValidationError') {
-          res.status(400).send({ message: 'Ошибка. Данные некорректны' });
-          return;
+          next(new BadRequestError('Ошибка. Данные некорректны'));
+        } else if (err.code === 11000) {
+          next(new ConflictError('Пользователь с таким email уже существует'));
+        } else {
+          next(err);
         }
-        res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
       });
   });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params._id)
     .orFail(() => {
       const error = new Error('CastError');
       error.statusCode = 404;
       throw error;
     })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Данные некорректны' });
-      } else if (err.statusCode === 404) {
-        res.status(404).send({ message: 'Нет пользователя' });
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Пользователь не найден'));
       } else {
-        res.status(500).send({ message: 'Запрашиваемый ресурс не найден' });
+        res.send(user);
       }
-    });
+    })
+    .catch(next);
 };
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'Запрашиваемый ресурс не найден' }));
+    .catch(next);
 };
 
 module.exports.login = (req, res) => {
