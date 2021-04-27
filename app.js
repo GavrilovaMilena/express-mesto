@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const auth = require('./middlewares/auth');
 
 const { createUser, login } = require('./controllers/users');
 
@@ -25,6 +26,8 @@ app.use((req, res, next) => {
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
 app.use(helmet());
+// авторизация
+app.use(auth);
 
 app.disable('x-powered-by');
 
