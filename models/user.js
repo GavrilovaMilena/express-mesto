@@ -30,8 +30,8 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
     select: false,
+    required: true,
   },
 });
 
@@ -39,8 +39,8 @@ const userSchema = new mongoose.Schema({
 // у него будет два параметра — почта и пароль
 function findUserByCredentials(email, password) {
   // попытаемся найти пользовател по почте
-  return this.findOne({ email })
-    .select('+password') // this — это модель User
+  return this.findOne({ email }) // this — это модель User
+    .select( '+password' )
     .then((user) => {
       // не нашёлся — отклоняем промис
       if (!user) {
