@@ -2,13 +2,16 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
-
-const auth = require('./middlewares/auth');
-const { createUser, login } = require('./controllers/users');
+const { celebrate, Joi } = require('celebrate');
+const NotFoundError = require('./errors/NotFoundError');
 
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
+const { createUser, login } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+
+// Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
 const app = express();
@@ -16,17 +19,54 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use('/cards', cardsRouter);
-app.use('/users', usersRouter);
+app.post('/signin', login);
+app.post('/signup', createUser);
 app.use(helmet());
 // авторизация
 app.use(auth);
 
 app.disable('x-powered-by');
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.use('/cards', cardsRouter);
+app.use('/users', usersRouter);
 
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+});
+
+app.use((err, req, res, next) => {
+  const { message } = err;
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'Произошла ошибка на сервере' : message,
+  });
+  next();
+});
+
+// Подключение роутов и обработка несуществующих роутов
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().email(),
+      password: Joi.string().required().min(10),
+    }),
+  }),
+  login,
+);
+
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().email(),
+      password: Joi.string().required().min(10),
+    }),
+  }),
+  createUser,
+);
+
+// подключаемся к серверу mongo
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,

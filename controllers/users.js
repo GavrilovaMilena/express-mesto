@@ -66,28 +66,24 @@ module.exports.updateAvatar = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  bcrypt.hash(password, 10).then((hash) => {
-    User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    })
-      .then((newUser) => res.send(newUser))
-      .catch((err) => {
-        if (err.name === 'ValidationError') {
-          next(new BadRequestError('Ошибка. Данные некорректны'));
-        } else if (err.code === 11000) {
-          next(new ConflictError('Пользователь с таким email уже существует'));
-        } else {
-          next(err);
-        }
-      });
-  });
+  bcrypt.hash(req.body.password, 10)
+    .then((_hash) => User.create({
+      name: req.body.name,
+      about: req.body.about,
+      avatar: req.body.avatar,
+      email: req.body.email,
+      password: _hash,
+    }))
+    .then((newUser) => res.send(newUser))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Ошибка. Данные некорректны'));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким email уже существует'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getUser = (req, res, next) => {
