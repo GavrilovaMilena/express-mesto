@@ -66,15 +66,25 @@ module.exports.updateAvatar = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  bcrypt.hash(req.body.password, 10)
-    .then((_hash) => User.create({
-      name: req.body.name,
-      about: req.body.about,
-      avatar: req.body.avatar,
-      email: req.body.email,
-      password: _hash,
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
     }))
-    .then((newUser) => res.send(newUser))
+    .then((user) => res.status(200).send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Ошибка. Данные некорректны'));
