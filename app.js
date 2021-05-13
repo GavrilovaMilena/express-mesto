@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const { celebrate, Joi } = require('celebrate');
 const NotFoundError = require('./errors/NotFoundError');
 
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
 
@@ -19,6 +21,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(requestLogger); // подключаем логгер запросов
+
 app.post('/signin', login);
 app.post('/signup', createUser);
 app.use(helmet());
@@ -29,6 +33,8 @@ app.disable('x-powered-by');
 
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
@@ -70,6 +76,7 @@ app.post(
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
+  useUnifiedTopology: true,
   useFindAndModify: false,
 });
 
