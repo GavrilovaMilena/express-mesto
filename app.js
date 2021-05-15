@@ -56,6 +56,13 @@ app.use((err, req, res, next) => {
   next();
 });
 
+//краш тест
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 // Подключение роутов и обработка несуществующих роутов
 app.post(
   '/signin',
