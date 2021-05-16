@@ -56,6 +56,8 @@ app.use((err, req, res, next) => {
   next();
 });
 
+headers.append('Access-Control-Allow-Origin', 'http://localhost:3000');
+
 //краш тест
 app.get('/crash-test', () => {
   setTimeout(() => {
