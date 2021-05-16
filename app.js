@@ -22,12 +22,25 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 
+const allowedCors = [
+  'https://mlngvr.nomoredomains.club',
+  'http://mlngvr.nomoredomains.club',
+];
+
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
 const app = express();
 
 app.use(cors());
+app.use((req, res, next) => {
+  const { origin } = req.headers;
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+
+  next();
+});
 app.use(limiter);
 
 app.use(bodyParser.json());
