@@ -10,16 +10,11 @@ const {
 
 usersRouter.get('/', getUsers);
 usersRouter.get(
-  '/:userId',
-  celebrate({
-    body: Joi.object().keys({
-      id: Joi.string().required().length(24).hex(),
-    }),
-  }),
+  '/me',
   getUser,
 );
 usersRouter.get(
-  '/me',
+  '/:_id',
   celebrate({
     body: Joi.object().keys({
       id: Joi.string().required().length(24).hex(),

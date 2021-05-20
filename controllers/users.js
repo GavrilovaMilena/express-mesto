@@ -99,7 +99,7 @@ module.exports.createUser = (req, res, next) => {
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params._id)
     .orFail(() => {
-      const error = new Error('CastError');
+      const error = new Error('CastError ' + req.params._id);
       error.statusCode = 404;
       throw error;
     })
