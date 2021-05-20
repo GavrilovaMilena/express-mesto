@@ -5,7 +5,7 @@ const BadRequestError = require('../errors/BadRequestError');
 
 module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params._id,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
@@ -32,7 +32,7 @@ module.exports.likeCard = (req, res, next) => {
 
 module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params._id,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
@@ -71,7 +71,7 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove(req.params._id)
     .orFail(() => {
       const error = new Error('CastError');
       error.statusCode = 404;
