@@ -13,7 +13,7 @@ cardsRouter.get('/', getCards);
 cardsRouter.post(
   '/',
   celebrate({
-    params: Joi.object().keys({
+    body: Joi.object().keys({
       name: Joi.string().required().min(2).max(24),
       link: Joi.string()
         .required()
