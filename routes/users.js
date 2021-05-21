@@ -10,7 +10,7 @@ const {
 
 usersRouter.get('/', getUsers);
 usersRouter.get(
-  '/id',
+  '/me',
   celebrate({
     body: Joi.object().keys({
       id: Joi.string().required().length(24).hex(),
@@ -22,8 +22,8 @@ usersRouter.patch(
   '/me',
   celebrate({
     body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30),
-      about: Joi.string().required().min(2).max(30),
+      name: Joi.string().required().min(2).max(24),
+      about: Joi.string().required().min(2).max(24),
     }),
   }),
   updateUser,
