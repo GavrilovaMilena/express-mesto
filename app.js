@@ -36,8 +36,31 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger); // подключаем логгер запросов
 app.use(cors());
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+// Подключение роутов и обработка несуществующих роутов
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(10),
+    }),
+  }),
+  login,
+);
+
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(10),
+      name: Joi.string().required().min(2).max(30),
+      about: Joi.string().required().min(2).max(30),
+      avatar: Joi.string().required().custom(checkURL, 'invalid URL')
+    }),
+  }),
+  createUser,
+);
 app.use(helmet());
 // авторизация
 app.use(auth);
@@ -70,29 +93,6 @@ app.get('/crash-test', () => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-
-// Подключение роутов и обработка несуществующих роутов
-app.post(
-  '/signin',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().email(),
-      password: Joi.string().required().min(10),
-    }),
-  }),
-  login,
-);
-
-app.post(
-  '/signup',
-  celebrate({
-    body: Joi.object().keys({
-      email: Joi.string().email(),
-      password: Joi.string().required().min(10),
-    }),
-  }),
-  createUser,
-);
 
 // подключаемся к серверу mongo
 mongoose.connect('mongodb://localhost:27017/mestodb', {

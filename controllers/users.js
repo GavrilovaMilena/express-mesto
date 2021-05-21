@@ -128,5 +128,7 @@ module.exports.login = (req, res) => {
       });
       res.send({ token });
     })
-    .catch(() => res.status(401).send({ message: 'Необходима авторизация' }));
+    .catch((err) => {
+      next(err);
+    });
 };

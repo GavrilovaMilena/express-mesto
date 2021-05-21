@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
+    validate: {
+      validator(value) {
+        return regex.test(value);
+      }
+    },
     default:
       'http://pm1.narvii.com/6878/7590f2750286a5952f65d5a0ebebc8f328b8163br1-720-901v2_00.jpg',
   },
