@@ -98,7 +98,7 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.getUser = (req, res, next) => {
-  User.findById(req.params._id)
+  User.findById(req.user._id)
     .orFail(() => {
       const error = new Error('Пользователь не найден');
       error.statusCode = 404;

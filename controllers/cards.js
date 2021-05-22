@@ -71,13 +71,16 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  const owner = req.user._id;
-  Card
-    .findOne({ _id: req.params.cardId })
-    .orFail(() => new NotFoundError('Карточка не найдена'))
-    .then((card) => {
-      if (!card.owner.equals(owner)) {
-        next(new ForbiddenError('Нет прав на удаление этой карточки'));
+  Card.findByIdAndRemove(req.params._id)
+    .orFail(() => {
+      const error = new Error('CastError');
+      error.statusCode = 404;
+      throw error;
+    }).then((card) => {
+      if (!card) {
+        next(new NotFoundError('Карточка не найдена'));
+      } else if (!card.owner.equals(req.user._id)) {
+        next(new ForbiddenError('Невозможно удалить чужую карточку'));
       } else {
         Card.deleteOne(card)
           .then(() => res.status(200).send({ message: 'Карточка удалена' }));
