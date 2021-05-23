@@ -134,3 +134,14 @@ module.exports.login = (req, res, next) => {
     })
     .catch(next);
 };
+
+module.exports.getMyProfile = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        next(new NotFoundError('Данные пользователя не найдены'));
+      }
+      res.status(200).send(user);
+    })
+    .catch((err) => next(err));
+};
