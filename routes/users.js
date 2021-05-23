@@ -9,7 +9,7 @@ const {
 } = require('../controllers/users');
 
 usersRouter.get('/', getUsers);
-userRoutes.get('/me', getMyProfile);
+usersRouter.get('/me', getMyProfile);
 usersRouter.get(
   '/:_id',
   celebrate({
