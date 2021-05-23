@@ -35,6 +35,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger); // подключаем логгер запросов
 app.use(cors());
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'https://mlngvr.nomoredomains.club');
+  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,AcceptUser-Agent,Keep-Alive,Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  next();
+});
 
 app.post('/signin', login);
 app.post('/signup', createUser);
