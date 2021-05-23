@@ -25,11 +25,6 @@ const limiter = rateLimit({
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
-const corsOptions = {
-  origin: allowedCors,
-  optionsSuccessStatus: 200,
-};
-
 const app = express();
 
 app.use(limiter);
@@ -43,7 +38,6 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use(helmet());
-app.use(cors(corsOptions));
 // авторизация
 app.use(auth);
 
