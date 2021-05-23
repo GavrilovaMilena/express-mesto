@@ -25,6 +25,11 @@ const limiter = rateLimit({
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
+const corsOptions = {
+  origin: allowedCors,
+  optionsSuccessStatus: 200,
+};
+
 const app = express();
 
 app.use(limiter);
