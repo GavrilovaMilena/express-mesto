@@ -82,7 +82,7 @@ module.exports.deleteCard = (req, res, next) => {
       } else if (!card.owner.equals(req.user._id)) {
         next(new ForbiddenError('Невозможно удалить чужую карточку'));
       } else {
-        Card.findById(req.params._id)
+        Card.findByIdAndRemove(req.params._id)
         .orFail(() => {
           const error = new Error('CastError');
           error.statusCode = 404;
@@ -90,8 +90,6 @@ module.exports.deleteCard = (req, res, next) => {
         }).then((card) => {
           if (!card) {
             next(new NotFoundError('Карточка не найдена'));
-          } else if (!card.owner.equals(req.user._id)) {
-            next(new ForbiddenError('Невозможно удалить чужую карточку'));
           } else {
             Card.deleteOne(card);
             res.status(200).send({
