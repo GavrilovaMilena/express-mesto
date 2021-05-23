@@ -91,7 +91,7 @@ module.exports.deleteCard = (req, res, next) => {
       } else {
         next(err);
       }
-    })
+    });
   };
 
   module.exports.getCards = (req, res, next) => {
