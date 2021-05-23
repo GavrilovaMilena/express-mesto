@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
@@ -38,7 +37,6 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use(helmet());
-app.use(cors());
 // авторизация
 app.use(auth);
 
