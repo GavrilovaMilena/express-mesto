@@ -71,7 +71,7 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params._id)
+  Card.findById(req.params._id)
     .orFail(() => {
       const error = new Error('CastError');
       error.statusCode = 404;
@@ -82,7 +82,29 @@ module.exports.deleteCard = (req, res, next) => {
       } else if (!card.owner.equals(req.user._id)) {
         next(new ForbiddenError('Невозможно удалить чужую карточку'));
       } else {
-        Card.deleteOne(card)
+        module.exports.deleteCard = (req, res, next) => {
+          Card.findByIdAndRemove(req.params._id)
+            .orFail(() => {
+              const error = new Error('CastError');
+              error.statusCode = 404;
+              throw error;
+            }).then((card) => {
+              if (!card) {
+                next(new NotFoundError('Карточка не найдена'));
+              } else if (!card.owner.equals(req.user._id)) {
+                next(new ForbiddenError('Невозможно удалить чужую карточку'));
+              } else {
+                Card.deleteOne(card)
+              }
+            })
+            .catch((err) => {
+              if (err.name === 'CastError') {
+                next(new BadRequestError('Данные некорректны'));
+              } else {
+                next(err);
+              }
+            })
+          };
       }
     })
     .catch((err) => {
