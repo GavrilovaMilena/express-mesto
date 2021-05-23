@@ -82,7 +82,7 @@ module.exports.deleteCard = (req, res, next) => {
       } else if (!card.owner.equals(req.user._id)) {
         next(new ForbiddenError('Невозможно удалить чужую карточку'));
       } else {
-        Card.findByIdAndRemove(req.params._id)
+        Card.findById(req.params._id)
         .orFail(() => {
           const error = new Error('CastError');
           error.statusCode = 404;
@@ -106,7 +106,6 @@ module.exports.deleteCard = (req, res, next) => {
             next(err);
           }
         });
-      };
       }
     })
     .catch((err) => {
@@ -115,7 +114,7 @@ module.exports.deleteCard = (req, res, next) => {
       } else {
         next(err);
       }
-    })
+    });
   };
 
   module.exports.getCards = (req, res, next) => {
