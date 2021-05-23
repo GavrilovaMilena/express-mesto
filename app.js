@@ -38,6 +38,7 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use(helmet());
+app.use(cors(corsOptions));
 // авторизация
 app.use(auth);
 
