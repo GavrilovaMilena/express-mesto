@@ -11,6 +11,9 @@ const NotFoundError = require('./errors/NotFoundError');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
+const cardsRouter = require('./routes/cards');
+const usersRouter = require('./routes/users');
+
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
