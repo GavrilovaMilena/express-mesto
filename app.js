@@ -11,9 +11,6 @@ const NotFoundError = require('./errors/NotFoundError');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
-const cardsRouter = require('./routes/cards');
-const usersRouter = require('./routes/users');
-
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
@@ -27,6 +24,7 @@ const { PORT = 3000 } = process.env;
 
 const app = express();
 
+app.use(cors());
 app.use(limiter);
 
 app.use(bodyParser.json());
