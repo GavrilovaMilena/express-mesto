@@ -25,28 +25,28 @@ cardsRouter.post(
   createCard,
 );
 cardsRouter.delete(
-  '/:cardId',
+  '/:_id',
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex(),
+      _id: Joi.string().required().length(24).hex(),
     }),
   }),
   deleteCard,
 );
 cardsRouter.put(
-  '/likes/:cardId',
+  '/likes/:_id',
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex(),
+      _id: Joi.string().required().length(24).hex(),
     }),
   }),
   likeCard,
 );
 cardsRouter.delete(
-  '/likes/cardId',
+  '/likes/:_id',
   celebrate({
     params: Joi.object().keys({
-      cardId: Joi.string().required().length(24).hex(),
+      _id: Joi.string().required().length(24).hex(),
     }),
   }),
   dislikeCard,
