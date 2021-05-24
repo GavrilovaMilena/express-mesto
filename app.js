@@ -2,14 +2,15 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const helmet = require('helmet');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, Joi, errors } = require('celebrate');
 const rateLimit = require('express-rate-limit');
-const NotFoundError = require('./errors/NotFoundError');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+
+const NotFoundError = require('./errors/NotFoundError');
 
 const cardsRouter = require('./routes/cards');
 const usersRouter = require('./routes/users');
@@ -27,41 +28,24 @@ const { PORT = 3000 } = process.env;
 
 const app = express();
 
+app.use(helmet());
+
+// подключаемся к серверу mongo
+mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+});
+
+
+app.use(cors());
 app.use(limiter);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger); // подключаем логгер запросов
-
-app.post('/signin', login);
-app.post('/signup', createUser);
-
-app.use(helmet());
-// авторизация
-app.use(auth);
-
-app.disable('x-powered-by');
-
-app.use('/cards', cardsRouter);
-app.use('/users', usersRouter);
-
-app.use(errorLogger); // подключаем логгер ошибок
-
-app.use(errors()); // обработчик ошибок celebrate
-
-app.use('*', (req, res, next) => {
-  next(new NotFoundError('Страница не найдена'));
-});
-
-app.use((err, req, res, next) => {
-  const { message } = err;
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).send({
-    message, // statusCode === 500 ? 'Произошла ошибка на сервере' : message,
-  });
-  next();
-});
 
 // краш тест
 app.get('/crash-test', () => {
@@ -93,12 +77,25 @@ app.post(
   createUser,
 );
 
-// подключаемся к серверу mongo
-mongoose.connect('mongodb://localhost:27017/mestodb', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
+app.use('/users', auth, usersRouter);
+app.use('/cards', auth, cardsRouter);
+
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+});
+
+app.use(errorLogger); // подключаем логгер ошибок
+app.use(errors()); // обработчик ошибок celebrate
+
+app.use((err, req, res, next) => {
+  const { message } = err;
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).send({
+    message: statusCode === 500
+    ? 'Произошла ошибка на сервере'
+    : message,
+  });
+  next();
 });
 
 app.listen(PORT, () => {});
